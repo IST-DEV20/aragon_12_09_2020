@@ -1,0 +1,7 @@
+<launch>
+
+
+  <!-- aragorn_teleop_key already has its own built in velocity smoother -->
+  <node pkg="aragorn_teleop" type="aragorn_teleop_key" name="aragorn_teleop_keyboard"  output="screen">
+  </node>
+</launch>
