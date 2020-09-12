@@ -1,0 +1,86 @@
+#!/usr/bin/env python
+
+#################################################################################
+# Copyright 2018 ROBOTIS CO., LTD.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#################################################################################
+
+# Authors: Gilbert #
+
+import rospy
+from geometry_msgs.msg import Twist
+from sensor_msgs.msg import Range
+from std_msgs.msg import Float64
+
+class Cliff():
+    def __init__(self):
+        
+        self.pub_max_vel = rospy.Publisher('/max_vel', Float64, queue_size= 1)
+
+        self.cliff_front_sub = rospy.Subscriber('/sensor/cliff_front', Range, self.get_cliff_front, queue_size = 1)
+        self.cliff_left_sub = rospy.Subscriber('/sensor/cliff_left', Range, self.get_cliff_left, queue_size = 1)
+        self.cliff_right_sub = rospy.Subscriber('/sensor/cliff_right', Range, self.get_cliff_right, queue_size = 1)
+
+        self.sraircase_range_detect = 0.2
+        self.cF_state = 0.0
+        self.cL_state = 0.0
+        self.cR_state = 0.0
+
+        self.cliff()
+
+    def get_cliff_front(self, cliff_front):
+        self.cF_state = cliff_front.range
+        #print("cf rang : %f", self.cF_state)
+
+    def get_cliff_left(self, cliff_left):
+        self.cL_state = cliff_left.range
+
+    def get_cliff_right(self, cliff_right):
+        self.cR_state = cliff_right.range
+
+    def check_status(self):
+        # if (self.cL_state or self.cF_state or self.cR_state) > self.sraircase_range_detect:
+        if self.cF_state > self.sraircase_range_detect:
+            self.fnStop()
+            print("Staircase Detected !!!")
+            self.fnStop()
+        else:
+            self.fnGO()
+    
+    def fnGO(self):
+        msg_pub_max_vel = Float64()
+        msg_pub_max_vel.data = 1.5
+        self.pub_max_vel.publish(msg_pub_max_vel)
+
+    def fnStop(self):
+        msg_pub_max_vel = Float64()
+        msg_pub_max_vel.data = 0.00
+        self.pub_max_vel.publish(msg_pub_max_vel)
+
+    def cliff(self):
+        rate = rospy.Rate(10)
+        while not rospy.is_shutdown():
+            self.check_status()
+            rate.sleep()
+
+
+def main():
+    rospy.init_node('aragorn_cliff')
+    try:
+        cliff = Cliff()
+    except rospy.ROSInterruptException:
+        pass
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,9 @@
+<launch>
+
+    <include file="$(find aragorn_bringup)/launch/aragorn_camera.launch"/>
+    <include file="$(find aragorn_bringup)/launch/aragorn_core.launch"/>
+    <include file="$(find aragorn_bringup)/launch/aragorn_io.launch"/>
+    <include file="$(find aragorn_bringup)/launch/aragorn_lidar.launch"/>
+    <include file="$(find aragorn_bringup)/launch/aragorn_sound.launch"/>
+
+</launch>
